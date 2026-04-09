@@ -8,38 +8,24 @@ from copy import (copy as CopiaObjeto)
 # cada cadastro será um dicionário do tipo 'string' e 'tupla'. A string é equivalente ao nome do 
 # paciente, já a tupla algumas informações adicionais, como: data e hora do cadastro; o nível de 
 # gravidade; e a idade dele.
-CAMINHO_DO_BANCO = "dados/cadastros.json"
-LISTA_DE_NOMES = "dados/testes/lista-de-nomes.txt"
+CAMINHO_DO_BANCO         = "dados/cadastros.json"
+LISTA_DE_NOMES           = "dados/testes/lista-de-nomes.txt"
 BANCO_DE_DADOS_CADASTROS = []
+# Contagem de adições e remoções realizadas no sistema de cadastros.
+(adicoes, remocoes) = (0, 0)
 
 
 def adiciona_cadastro(registro: dict) -> None:
     "Apenas adiciona um 'cadastro' dado no banco de dados carregado na memória."
     assert isinstance(registro, dict)
-    global BANCO_DE_DADOS_CADASTROS
+    global BANCO_DE_DADOS_CADASTROS, adicoes
 
     BANCO_DE_DADOS_CADASTROS.append(registro)
+    adicoes += 1
 
-def cadastro_palatavel_pra_json(registro: dict) -> dict:
-    """
-      Como JSON não aceitam 'datetime' em sí, vamos converter-los para 'float'
-    O dicionário aqui passado é alterado. A função também retorna a referência
-    do  mesmo objeto.
-    """
-    dicio = registro
-    
-    if __debug__:
-        pprint(dicio)
-        
-    for nome in registro:
-            criacao = dicio[nome]["criação"]
-            modificado = dicio[nome]["modificação"]
+def remove_cadastro(nome: str, id: int) -> bool:
+    raise NotImplementedError("Tem que pensar ainda no mecanismo.")
 
-            dicio[nome]["criação"] = criacao.timestamp()
-            dicio[nome]["modificação"] = modificado.timestamp()
-           
-    return registro
-   
 def salva_banco_de_dados() -> None:
     """
       Salva todas modificações ou inserções no 'banco de cadastros' em disco.
@@ -47,20 +33,25 @@ def salva_banco_de_dados() -> None:
     que é um 'float', já que o JSON não é capaz inicialmente de armazenar tal tipo
     de dado estruturado. Nada será retornado.
     """
-    global BANCO_DE_DADOS_CADASTROS
+    global BANCO_DE_DADOS_CADASTROS, adicoes
     # Clone da lista com dicionários atuais. Assim, não modificará o que está
     # rodando na memória. Se não fizess isso, causaria um problema de 'datarace'.
     lista_de_cadastros_ajustados = CopiaObjeto(BANCO_DE_DADOS_CADASTROS)
-
+    
     # Transformando cada 'datetime' no seu 'timestamp'(um decimal).
     for dicio in lista_de_cadastros_ajustados:
-        cadastro_palatavel_pra_json(dicio)
+        converte_o_datetime_num_timestamp(dicio)
 
     # Gravando a lista de dados no respectivo caminho que foi dado.
     arquivo = open(CAMINHO_DO_BANCO, "wt", encoding="utf8")
     json.dump(lista_de_cadastros_ajustados, arquivo, indent=4)
     arquivo.close()
-    print("Os cadastros foram salvos com sucesso.")
+    
+    # Mensagem final dependendo se houve alterações de fato no banco.
+    if adicoes == 0 and remocoes == 0:
+        print("O banco se manteve inalterado.")
+    else:
+        print("Os cadastros inseridos ou modificações foram salvos com sucesso.")
 
 def carrega_banco_de_dados() -> None:
     """
@@ -72,23 +63,56 @@ def carrega_banco_de_dados() -> None:
     """
     global BANCO_DE_DADOS_CADASTROS
 
-    # Abre o arquivo do caminho específicado. Então atribui a lista decodificada
-    # na variável global que registra os cadastros em tempo de execução.
-    arquivo = open(CAMINHO_DO_BANCO, "rt", encoding="utf8")
-    lista_resultado = json.load(arquivo)
-    arquivo.close()
-
     # Modifica novamente o 'timestamp' para um 'datetime'.
-    for dicio in lista_resultado:
-        for nome in dicio:
+    for dicio in carrega_cadastros_do_banco_de_dados_json():
+        converte_o_timestamp_num_datetime(dicio)
+        # Adiciona no banco de dados carregado na memória.
+        BANCO_DE_DADOS_CADASTROS.append(dicio)
+        
+    print("O banco de dados foi carregado com sucesso.")
+
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
+#                                Funções Auxiliares                                         #
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
+def converte_o_datetime_num_timestamp(registro: dict) -> dict:
+    """
+      Como JSON não aceitam 'datetime' em sí, vamos converter-los para 'float'
+    O dicionário aqui passado é alterado. A função também retorna a referência
+    do  mesmo objeto.
+    """
+    dicio = registro
+    
+    for nome in registro:
             criacao = dicio[nome]["criação"]
             modificado = dicio[nome]["modificação"]
 
-            dicio[nome]["criação"] = datetime.fromtimestamp(criacao)
-            dicio[nome]["modificação"] = datetime.fromtimestamp(modificado)
-            BANCO_DE_DADOS_CADASTROS.append(dicio)
-    print("O banco de dados foi carregado com sucesso.")
+            dicio[nome]["criação"] = criacao.timestamp()
+            dicio[nome]["modificação"] = modificado.timestamp()
+           
+    return registro
 
+def converte_o_timestamp_num_datetime(cadastro: dict) -> None:
+    assert isinstance(cadastro, dict)
+    dicio = cadastro
+    
+    for nome in cadastro:
+        criacao = dicio[nome]["criação"]
+        modificado = dicio[nome]["modificação"]
+
+        dicio[nome]["criação"] = datetime.fromtimestamp(criacao)
+        dicio[nome]["modificação"] = datetime.fromtimestamp(modificado)
+   
+def carrega_cadastros_do_banco_de_dados_json() -> list[dict]:
+    global CAMINHO_DO_BANCO
+    
+    # Abre o arquivo do caminho específicado. Então atribui a lista decodificada
+    # na variável global que registra os cadastros em tempo de execução.
+    arquivo = open(CAMINHO_DO_BANCO, "rt", encoding="utf8")
+    lista = json.load(arquivo)
+    arquivo.close()
+    
+    return lista
+   
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
 #                                Testes Unitários                                           #
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
