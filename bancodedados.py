@@ -14,6 +14,7 @@ from modelos import (cadastro_e_valido)
 CAMINHO_DO_BANCO         = "dados/cadastros.json"
 LISTA_DE_NOMES           = "dados/testes/lista-de-nomes.txt"
 BANCO_DE_DADOS_CADASTROS = []
+BDD_INCIALIZADO          = False
 # Contagem de adições e remoções realizadas no sistema de cadastros.
 (adicoes, remocoes) = (0, 0)
 
@@ -68,16 +69,30 @@ def carrega_banco_de_dados() -> None:
     dados. Observe que o algoritmo não apaga as outras já carregadas, apenas adiciona 
     novas.
     """
-    global BANCO_DE_DADOS_CADASTROS
+    global BANCO_DE_DADOS_CADASTROS, BDD_INCIALIZADO
 
-    # Modifica novamente o 'timestamp' para um 'datetime'.
-    for dicio in carrega_cadastros_do_banco_de_dados_json():
-        converte_o_timestamp_num_datetime(dicio)
-        # Adiciona no banco de dados carregado na memória.
-        BANCO_DE_DADOS_CADASTROS.append(dicio)
+    # Apenas carrega uma única vez por programa.
+    if (not BDD_INCIALIZADO):
+        # Modifica novamente o 'timestamp' para um 'datetime'.
+        for dicio in carrega_cadastros_do_banco_de_dados_json():
+            converte_o_timestamp_num_datetime(dicio)
+            # Adiciona no banco de dados carregado na memória.
+            BANCO_DE_DADOS_CADASTROS.append(dicio)
+        # Informando que a instância já foi inicializada.
+        BDD_INCIALIZADO = True
         
     print("O banco de dados foi carregado com sucesso.")
 
+def todos_cadastros() -> list[dict]:
+    """
+    Retorna uma copia dos cadastros na memória. É uma cópia, e não a referência
+    original, já que se fosse este último, qualquer alteração, mexeria no
+    banco em sí.
+    """
+    if (not BDD_INCIALIZADO):
+        raise Exception("É preciso inicializar o BDD primeiro antes de chamar tal função")
+    else:
+        return BANCO_DE_DADOS_CADASTROS[:]
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
 #                                Funções Auxiliares                                         #
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
