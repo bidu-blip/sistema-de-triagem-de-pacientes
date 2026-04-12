@@ -2,6 +2,7 @@
 from datetime import (datetime, timedelta)
 from unittest import (TestCase)
 from pprint import (pprint as PPrint)
+# Módulos pro próprio projeto:
 
 def cadastro_e_valido(cadastro: dict) -> bool:
     """
@@ -63,6 +64,72 @@ def cria_cadastro(nome: str, idade: int, nivel: int, criacao: datetime, modifica
 def igualdade_cadastro(a: dict, b: dict) -> bool:
     "Verifica se os cadastros 'a' e 'b' são iguais, nos termos deste programa, obviamente."
     pass
+
+# Metodos para consulta dos campos do 'Cadastro'. Como o tipo de dado abstrado
+# não é uma 'classe', estes 'métodos' não são ligados ao objeto.
+def nome_cadastro(cadastro: dict) -> str:
+    """
+    Retorna o nome do cadastro dado. Parece bastante trivial para cá, mas é 
+    bom lembrar que, o cadastro é um aninhamento de dicionários, portanto seu 
+    nome não é tão fácil de acessar quanto parece.
+    """
+    assert cadastro_e_valido(cadastro)
+
+    for nome in cadastro:
+        return nome
+
+def criacao_cadastro(cadastro: dict) -> datetime:
+    "Retorna a data de criação do cadastro no sistema."
+    assert cadastro_e_valido(cadastro)
+
+    return cadastro[nome_cadastro(cadastro)]["criação"]
+
+def idade_cadastro(cadastro: dict) -> int:
+    "Retorna a idade do cadastro dado."
+    assert cadastro_e_valido(cadastro)
+
+    return cadastro[nome_cadastro(cadastro)]["idade"]
+
+def nivel_de_dor_cadastro(cadastro: dict) -> int:
+    "Retorna o nível de dor do cadastro dado."
+    assert cadastro_e_valido(cadastro)
+
+    return cadastro[nome_cadastro(cadastro)]["estado"]
+
+def mostra_cadastro(cadastro: dict) -> None:
+    "Recursos importantes do cadastro dado. E também melhores interpretados."
+    assert cadastro_e_valido(cadastro)
+
+    OUTRO_RECUO = ' ' * 3
+    RECUO = ' ' * 5
+    nome = nome_cadastro(cadastro)
+    idade = idade_cadastro(cadastro)
+    nivel = nivel_de_dor_cadastro(cadastro)
+    nivel = traducao_do_nivel_de_dor(nivel).capitalize()
+
+    print(
+        f"""\r{OUTRO_RECUO}{nome}
+        \r{RECUO}- Nível de dor {nivel:.>19s}
+        \r{RECUO}- Idade {idade:.>19d}
+        """, 
+    )
+
+def traducao_do_nivel_de_dor(nivel: int) -> str:
+    assert isinstance(nivel, int)
+    assert 1 <= nivel <= 5
+
+    match nivel:
+        case 1:
+            return "sem gravidade"
+        case 2:
+            return "leve"
+        case 3:
+            return "monitorado"
+        case 4:
+            return "grave"
+        case 5:
+            return "muito grave"
+
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
 #                                Testes Unitários                                           #
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
