@@ -140,16 +140,20 @@ class InsercoesAutomaticasEmSerie(TestCase):
     def runTest(self):
         X = randint(2, 5)
         amostras = [cria_cadastro_aleatorio() for _ in range(X)]
+        cursor = 0
+        PAUSA = 3.0
         
         print(f"Serão inseridas {X} ao total.")
         
-        for p in range(X):
+        for cadastro in amostras:
             try:
-                adiciona_um_cadastro_de_forma_direta(amostras[p])
+                adiciona_um_cadastro_de_forma_direta(cadastro)
             except AttributeError as erro:
-                print(amostras[p])
-                print(f"Falhou no {p + 1}! ({erro})")
-            sleep(3.0)
+                print(cadastro)
+                print(f"Falhou no {cursor + 1}! ({erro})")
+
+            sleep(PAUSA)
+            cursor += 1
 
 class InsercaoDiretaManualComMecanismoAutomatico(TestCase):
     def runTest(self):

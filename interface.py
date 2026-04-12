@@ -3,7 +3,7 @@ import shutil
 from unittest import (TestCase)
 from datetime import (datetime, timedelta)
 # Módulos pro próprio projeto:
-from bancodedados import (BANCO_DE_DADOS_CADASTROS)
+from bancodedados import (todos_cadastros)
 from modelos import (cria_cadastro)
 
 # Nome genérico que "inventei". Na verdade, pedir para o 'Gemini' criar tal, mas baseado no seguinte
@@ -59,15 +59,16 @@ def visualizacao_do_menu(*menus: list[str]) -> None:
     print(''); print(barra_do_tamanho_da_tela('+')); print('')
 
 def listagem_de_cadastros() -> None:
-    global BANCO_DE_DADOS_CADASTROS
+    LISTA_DE_CADASTROS = todos_cadastros() 
+    total = len(LISTA_DE_CADASTROS)
     # Pula uma linha para ficar mais organizado(espaçado).
     print("")
 
-    if len(BANCO_DE_DADOS_CADASTROS) == 0:
+    if len(LISTA_DE_CADASTROS) == 0:
         print("\nNão há cadastros.", end='\n\n')
     else:
-        print(f"\nTodos os {len(BANCO_DE_DADOS_CADASTROS)} abaixo:", end='\n\n')
-        for dicio in BANCO_DE_DADOS_CADASTROS:
+        print(f"\nTodos os {total} abaixo:", end='\n\n')
+        for dicio in LISTA_DE_CADASTROS:
             for nome in dicio:
                 print(recuo(2), '-', nome)
         # Pula uma linha para ficar mais organizado(espaçado).
@@ -81,6 +82,7 @@ def manual_de_ajuda_do_programa() -> None:
         \r\tRemover    - Remove um cadastro do banco.
         \r\tAjuda      - Mostra este manual aqui.
         \r\tListar     - Listagem de cadastros realizados.
+        \r\tInfo       - Mostra algumas estatísticas sobre o programa.
         \r\tSair       - Abandonar o programa de forma padrão. Lebrando que
         \r\t             outros métodos de fazer isso, não garante que os
         \r\t             cadastros removidos ou adicionados são salvos.
@@ -108,11 +110,13 @@ def cadastra_novo_usuario_agora() -> dict:
 
     return cria_cadastro(nome, idade, nivel_de_dor, criacao, modificacao)
 
+
 def entrada_escolha_do_menu(menus: list[str]) -> int:
     "Pega uma lista com os menus, então retorna o número equivalente de cada opção."
     assert all(map(lambda item: isinstance(item, str), menus))
     
-    entrada = input("Escolha uma opção: ")
+    entrada = entrada_pura_de_dados()
+    print(barra_do_tamanho_da_tela('+'))
 
     if entrada.isdigit():
         valor = int(entrada)
@@ -130,7 +134,7 @@ def entrada_escolha_do_menu(menus: list[str]) -> int:
             if entrada.lower() in opcao.lower():
                 return (indice + 1)
         #raise ValueError(f"Não existe está opção {entrada}.")
-        print(f"Não existe está opção {entrada}. Programa quebrou!")
+        print(f"Não existe está opção '{entrada}'. Programa quebrou!")
         exit(2)
     else:
         #raise ValueError(f"Não aceita está entrada {entrada}, apenas 'int' e 'str'.")
@@ -192,6 +196,17 @@ def recuo(n: int) -> str:
     ESPACO = ' '
     return ESPACO * n
 
+def entrada_pura_de_dados() -> str:
+    """
+    Um simples prompt, entretanto, fica em loop se a entrada dada for uma
+    string vázia, ou seja, o usuário apenas apertou ENTER direto.
+    """
+    entrada = input("Escolha uma opção: ")
+
+    # Entradas vázias ficam apenas repetindo o comando.
+    while entrada is '':
+        entrada = input("Escolha uma opção: ")
+    return entrada
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
 #                                Testes Unitários                                           #
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
