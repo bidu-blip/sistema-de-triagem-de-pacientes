@@ -4,7 +4,9 @@ from unittest import (TestCase)
 from datetime import (datetime, timedelta)
 # Módulos pro próprio projeto:
 from bancodedados import (todos_cadastros)
-from modelos import (cria_cadastro)
+from modelos import (cria_cadastro, nome_cadastro)
+# Módulos de bibliotecas externas:
+from externo.legivel import (tempo as tempo_legivel)
 
 # Nome genérico que "inventei". Na verdade, pedir para o 'Gemini' criar tal, mas baseado no seguinte
 # prompt: "Pode sugerir-me um nome de hospital, um que remeta a uma instituição antiga e respeitada."
@@ -18,8 +20,8 @@ from modelos import (cria_cadastro)
 #    Hospital Sancta Vita
 #    Hospital Magnus Curatio
 #    Instituto Salus
-NOME_DO_HOSPITAL = "Centro Hospitalar Acadêmico Silva Brandão"
-
+#NOME_DO_HOSPITAL = "Centro Hospitalar Acadêmico Silva Brandão"
+NOME_DO_HOSPITAL = "Sociedade Hospitalar Dom Pedro II"
 
 def visualizacao_do_menu(*menus: list[str]) -> None:
     """
@@ -63,14 +65,41 @@ def listagem_de_cadastros() -> None:
     total = len(LISTA_DE_CADASTROS)
     # Pula uma linha para ficar mais organizado(espaçado).
     print("")
+    
+    # Eu não gosto de aninhar funções para criar auxiliares, porém, como este código está
+    # muito relacionado a esta abstração do arquivo, abrirei uma exceção.
+    def print_formatado(nome, comprimento, tempo):
+        "Função auxilar para formatar uma saída mais bonita, com os seguintes parâmetros necessários."
+        lacuna = comprimento - len(nome)
+        tabular = comprimento + lacuna
+        SIMBOLO = '~ '
+        
+        print(f"{ESPACO}- {nome}{SIMBOLO:>{tabular}s}{traducao}")
 
     if len(LISTA_DE_CADASTROS) == 0:
         print("\nNão há cadastros.", end='\n\n')
     else:
         print(f"\nTodos os {total} abaixo:", end='\n\n')
+        
+        # Pega o comprimento do maior nome.
+        comprimento = max(len(nome_cadastro(obj)) for obj in LISTA_DE_CADASTROS)
+        # Espaço padrão para qualquer item listado.
+        ESPACO = recuo(2)
+        
         for dicio in LISTA_DE_CADASTROS:
             for nome in dicio:
-                print(recuo(2), '-', nome)
+                try:
+                    antigo = dicio[nome]["criação"].timestamp()
+                    novo = datetime.today().timestamp()
+                    decorrido = novo - antigo
+                    traducao = tempo_legivel(decorrido)
+                    
+                except ValueError:
+                    SEM_VALOR = "(ERROR)"
+                    traducao = SEM_VALOR
+                    
+                finally:
+                    print_formatado(nome, comprimento, traducao)
         # Pula uma linha para ficar mais organizado(espaçado).
         print("")
 
@@ -109,7 +138,6 @@ def cadastra_novo_usuario_agora() -> dict:
         print(f"O nível foi ajustado para {nivel_de_dor}.")
 
     return cria_cadastro(nome, idade, nivel_de_dor, criacao, modificacao)
-
 
 def entrada_escolha_do_menu(menus: list[str]) -> int:
     "Pega uma lista com os menus, então retorna o número equivalente de cada opção."
@@ -204,7 +232,7 @@ def entrada_pura_de_dados() -> str:
     entrada = input("Escolha uma opção: ")
 
     # Entradas vázias ficam apenas repetindo o comando.
-    while entrada is '':
+    while entrada == '':
         entrada = input("Escolha uma opção: ")
     return entrada
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
