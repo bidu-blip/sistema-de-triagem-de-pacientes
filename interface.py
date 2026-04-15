@@ -109,14 +109,32 @@ def manual_de_ajuda_do_programa() -> None:
     print("""
         \rVocê pediu por ajuda. Aqui está o manual:
 
-        \r\tAdicionar  - Realiza e adiciona novo cadastro.
-        \r\tRemover    - Remove um cadastro do banco.
-        \r\tAjuda      - Mostra este manual aqui.
-        \r\tListar     - Listagem de cadastros realizados.
-        \r\tInfo       - Mostra algumas estatísticas sobre o programa.
-        \r\tSair       - Abandonar o programa de forma padrão. Lebrando que
-        \r\t             outros métodos de fazer isso, não garante que os
-        \r\t             cadastros removidos ou adicionados são salvos.
+        \r\tAdicionar  \tRealiza e adiciona novo cadastro. Você coloca o nome, idade e o estado
+        \r\t           \tde saúde que ele entrou. O tempo de cadastro é adicionado automaticamente.
+        
+        \r\tRemover    \tRemove um cadastro do banco. Apenas o nome completa, o 'case sensitive' 
+        \r\t           \té irrelevant aqui. Entretanto, se houve alguma letra ou espaço 
+        \r\t           \t faltando ele não irá realizar tal remoção. Se for algo similar, ele 
+        \r\t           \t propõe sugestões do que você realmente pode querer.
+
+        \r\tListar     \tListagem de cadastros realizados. Mostra os nomes cadastros, e o tempo
+        \r\t           \tdecorrido desde sua entrada no hospital.
+        
+        \r\tInfo       \tMostra algumas estatísticas sobre o programa. Médias, distribuição
+        \r\t           \tda triagem dos pacientes. Alguns dados interessantes sobre alguns casos.
+        
+        \r\tConsulta   \tVocê deseja saber se há, ou informações de uma determinada pessoa cadastrada 
+        \r\t           \tno hospital. Para mostrar a informação do paciente, o nome tem que está 
+        \r\t           \tcorreto. Se você digitar algo similar, mas não exato, ele apenas sugere 
+        \r\t           \talguns nomes que podem haver. Isso é até um bom jeito de limitar o que
+        \r\t           \tvocê está procurando, digitando apenas algum sobre e tal.
+        
+        \r\tAjuda      \tApenas mostra este manual aqui. Como os nomes dos "botões" são muito curtos
+        \r\t           \te sem qualquer contexto, esta página ajuda muito.
+                               
+        \r\tSair       \tAbandonar o programa de forma padrão. Lebrando que outros métodos de fazer isso, 
+        \r\t           \tnão garante que os cadastros removidos ou adicionados são salvos. Com exceção
+        \r\t           \tdo comando <Ctrl + C>.
     """)
 
 def cadastra_novo_usuario_agora() -> dict:
