@@ -4,14 +4,20 @@
   pela gravidade.
 '''
 # Módulos pro próprio projeto:
-from bancodedados import (adiciona_cadastro, carrega_banco_de_dados, salva_banco_de_dados, todos_cadastros, busca_cadastro)
+from bancodedados import (
+    adiciona_cadastro, carrega_banco_de_dados, salva_banco_de_dados, 
+    todos_cadastros, busca_cadastro
+    )
 from interface import (
     cadastra_novo_usuario_agora, entrada_escolha_do_menu, visualizacao_do_menu, 
     listagem_de_cadastros, manual_de_ajuda_do_programa, cabecalho_padrao_do_hospital
     )
-from modelos import (cria_cadastro, nome_cadastro, criacao_cadastro, mostra_cadastro)
+from modelos import (cria_cadastro, nome_cadastro, criacao_cadastro, mostra_cadastro, 
+                     nivel_de_dor_cadastro, traducao_do_nivel_de_dor, idade_cadastro)
 # Biblioteca padrão do Python:
 from pprint import (pprint as Pprint)
+from sys import (argv as Argumentos)
+import os
 
 """
 *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
@@ -25,10 +31,6 @@ MENU_DE_OPCOES = [
     "Ajuda", "Sair"
 ]
 
-# Carrega todos os registros já feitos no banco de dados na memória.
-carrega_banco_de_dados()
-# Cabeçalho da abertura do programa.
-cabecalho_padrao_do_hospital()
 
 def cadastro_mais_antigo_realizado() -> dict:
     BANCO = todos_cadastros()
@@ -62,9 +64,64 @@ def cadastro_mais_recente_realizado() -> dict:
 
     return minimo
 
+def computa_a_distribuicao_da_triagem() -> dict:
+    lista = todos_cadastros()
+    distribuicao = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    
+    for cadastro in lista:
+        indice = nivel_de_dor_cadastro(cadastro)
+        distribuicao[indice] += 1
+    
+    total = sum(distribuicao.values())
+
+    # Convertendo tudo em percentuais.
+    for indice in range(1, 5 + 1):
+        contagem = distribuicao[indice]
+        distribuicao[indice] = contagem / total
+    return distribuicao
+      
+def media_de_idade() -> int:
+    lista_completa = todos_cadastros()
+    quantidade = len(lista_completa)
+    
+    return int(sum(map(idade_cadastro, lista_completa)) / quantidade)
+
+def mostra_distribuicao_de_gravidade():
+    distribuicao = computa_a_distribuicao_da_triagem()
+    
+    print("\nComo estão dividido a triagem dos pacientes cadastros:")
+    
+    for (tipo, percentual) in distribuicao.items():
+        estado = traducao_do_nivel_de_dor(tipo)
+        
+        print(f"\t{estado.capitalize():<20s} ~{percentual * 100.0:0.1f}%")
+
+def mostra_uma_info_mais_geral():
+    total = len(todos_cadastros())
+    
+    print(f"\nO total de inserções é {total} cadastros.")
+    print(f"A média de idade é {media_de_idade()} anos.")
+    print("\nOs cadastros mais velhos e novos feitos:")
+
+def mostra_ultimos_e_primeiros_pacientes():
+    antigo = cadastro_mais_antigo_realizado()
+    recente = cadastro_mais_recente_realizado()
+    
+    mostra_cadastro(antigo)
+    mostra_cadastro(recente)
+
+# Carrega todos os registros já feitos no banco de dados na memória.
+carrega_banco_de_dados()
+# Cabeçalho da abertura do programa.
+cabecalho_padrao_do_hospital()
+
+
 while True:
+    # Mostra o menu se não a primeira vez, então novamente. 
     visualizacao_do_menu(*MENU_DE_OPCOES)
     
+    # Captura terminos repetinos como o sinal de <Ctrl + C>, permitindo assim,
+    # salvar cadastros alterados, inseridos ou removidos.
     try:
         match entrada_escolha_do_menu(MENU_DE_OPCOES):
             case 1:
@@ -81,14 +138,11 @@ while True:
             case 3:
                 listagem_de_cadastros()
             case 4:
-                total = len(todos_cadastros())
-                antigo = cadastro_mais_antigo_realizado()
-                recente = cadastro_mais_recente_realizado()
-
-                print(f"\nO total de inserções é {total} cadastros.")
-                print("Os cadastros mais velhos e novos feitos:")
-                mostra_cadastro(antigo)
-                mostra_cadastro(recente)
+                mostra_uma_info_mais_geral()
+                mostra_ultimos_e_primeiros_pacientes()
+                mostra_distribuicao_de_gravidade()
+                # Espaçador de linha.
+                print("")
 
             case 5:
                 prompt = input("\nDigite o nome completo: ")
