@@ -1,0 +1,67 @@
+<!--  
+  Prompt que foi necessário para gerar, ao menos o básico desta página, com o 
+  Gemini:
+
+  Por favor, gere uma simples página que mostre um título no formato daqueles 
+  de jornais, este separado por uma barra. Abaixo disso tudo vem uma tabela, 
+  com os campos necessários do sistema de triagem: nome, idade, nível de dor, 
+  criação. O esquema de cores que estou pensando é, algo parecido com o GitHub 
+  no modo 'dark'. Eu quero as bordas da tabelas bem amigaveis,... bem 
+  redondas. O código tem que ser apenas em HTML puro, nada de CSS ou 
+  JavaScript. Também, tente espaçar cada parte importante. Não tenho muito 
+  conhecimento dele assim para diferenciar tudo.
+ -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sistema de Triagem de Pacientes</title>
+</head>
+<body text="#c9d1d9" bgcolor="#0d1117" style="font-family: Arial, sans-serif; padding: 20px;">
+
+    <h1 align="center" style="color: #5ec1df; font-family: 'Times New Roman', serif; letter-spacing: 2px;">
+        Sociedade Hospitalar Dom Pedro II
+    </h1>
+    <hr size="2" color="#30363d" width="90%">
+    <br>
+
+    <table align="center" width="90%" cellpadding="15" cellspacing="0" style="background-color: #161b22; border-radius: 12px; overflow: hidden; border: 1px solid #30363d;">
+        <tr bgcolor="#21262d" style="text-align: left; font-size: 18px; color: #ffffff;">
+            <th width="10%">Nome</th>
+            <th width="20%", align="center">Idade</th>
+            <th width="25%">Nível de Dor</th>
+            <th width="15%">Entrada</th>
+        </tr>
+        <tr>
+            <td><b>Cassandra Touros de Leite</b></td>
+            <td align="center">15</td>
+            <td style="color: yellow"><b>Moderado</b></td>
+            <td>Oct 24, 2023</td>
+        </tr>
+
+        <tr bgcolor="#0d1117">
+            
+            <td><b>Lucas Del Rei</b></td>
+            <td align="center">29</td>
+            <td style="color: red"><b>Grave</b></td>
+            <td>Oct 24, 2023</td>
+        </tr>
+
+        <tr>
+            <td><b>Claúdia Alves Pereira</b></td>
+            <td align="center">14</td>
+            <td style="color: yellow"><b>Monitorando</b></td>
+            <td>Oct 23, 2023</td>
+        </tr>
+
+        <tr bgcolor="#0d1117">
+            <td><b>Angélica da Silva Dares</b></td>
+            <td align="center">55</td>
+            <td style="color:green"><b>Leve</b></td>
+            <td>Oct 22, 2023</td>
+        </tr>
+        
+    </table>
+
+</body>
+</html>
