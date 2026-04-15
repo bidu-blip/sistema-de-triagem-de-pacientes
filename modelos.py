@@ -61,6 +61,7 @@ def cria_cadastro(nome: str, idade: int, nivel: int, criacao: datetime, modifica
           }
     }
 
+# Operadores lógicos do cadastro em termos de funções.
 def igualdade_cadastro(a: dict, b: dict) -> bool:
     """
     Verifica se os cadastros 'a' e 'b' são iguais, nos termos deste programa, 
@@ -104,6 +105,7 @@ def nivel_de_dor_cadastro(cadastro: dict) -> int:
 
     return cadastro[nome_cadastro(cadastro)]["estado"]
 
+# Outros métodos relacionados a este tipo de dado.
 def mostra_cadastro(cadastro: dict) -> None:
     "Recursos importantes do cadastro dado. E também melhores interpretados."
     assert cadastro_e_valido(cadastro)
@@ -116,6 +118,8 @@ def mostra_cadastro(cadastro: dict) -> None:
     nivel = traducao_do_nivel_de_dor(nivel).capitalize()
     data = cadastro[nome]["criação"]
     datastr = data.strftime("%d/%m/%Y às %I%p")
+    # Já é sabido qual o maior rótulo.
+    maior = len("Nível de dor")
 
     print(
         f"""
@@ -127,6 +131,7 @@ def mostra_cadastro(cadastro: dict) -> None:
     )
 
 def traducao_do_nivel_de_dor(nivel: int) -> str:
+    "Retorna um texto mais legível para os inteiros relacionados a níveis de dor."
     assert isinstance(nivel, int)
     assert 1 <= nivel <= 5
 
