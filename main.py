@@ -134,7 +134,16 @@ while True:
                 finally:
                     pass
             case 2:
-                pass
+                remove_paciente = input('Digite o nome do paciente que deseja remover: ').strip()
+                texto_validacao = remove_paciente
+                
+                if remove_paciente == "" or not texto_validacao.isalpha():
+                    print("Erro: Por favor, digite um nome válido contendo apenas letras.")
+                else:
+                    if remove_cadastro(remove_paciente):
+                        print(f'Paciente {remove_paciente} removido com SUCESSO!')
+                    else:
+                        print(f'O paciente \'{remove_paciente}\' não foi encontrado!')
             case 3:
                 listagem_de_cadastros()
             case 4:

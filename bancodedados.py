@@ -38,6 +38,21 @@ def adiciona_cadastro(registro: dict) -> None:
 def remove_cadastro(nome: str, id: int) -> bool:
     raise NotImplementedError("Tem que pensar ainda no mecanismo.")
 
+# REMOVENDO CADASTRO 
+# COLOQUEI ESSA CONDICAO NO CASE 2 MAIS PRA TIRA O PROBLEMA DOS ESPAÇOS E CARACTERES
+# TESTEI E FUNCIONOU CASO QUEIRA ALTERA PODE FICA A VONTADE
+def remove_cadastro(nome: str) -> bool:
+    assert isinstance(nome,str)
+    global BANCO_DE_DADOS_CADASTROS,remocoes
+    
+    for registro in BANCO_DE_DADOS_CADASTROS:
+        for nome_chave in registro.keys():
+            if nome_chave.lower() == nome.lower():
+                BANCO_DE_DADOS_CADASTROS.remove(registro)
+                remocoes += 1
+                return True
+    return False
+
 def salva_banco_de_dados() -> None:
     """
       Salva todas modificações ou inserções no 'banco de cadastros' em disco.
