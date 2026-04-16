@@ -137,15 +137,16 @@ def traducao_do_nivel_de_dor(nivel: int) -> str:
 
     match nivel:
         case 1:
-            return "sem gravidade"
+            #return "sem gravidade"
+            return "estável"
         case 2:
-            return "leve"
+            return "desabilitado"
         case 3:
-            return "monitorado"
+            return "agudo"
         case 4:
             return "grave"
         case 5:
-            return "muito grave"
+            return "vital"
 
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
 #                                Testes Unitários                                           #
