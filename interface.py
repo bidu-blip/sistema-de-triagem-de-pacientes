@@ -2,9 +2,19 @@
 import shutil
 from unittest import (TestCase)
 from datetime import (datetime, timedelta)
+from random import (shuffle as embaralha)
 # Módulos pro próprio projeto:
 from bancodedados import (todos_cadastros)
-from modelos import (cria_cadastro, nome_cadastro)
+from modelos import (cria_cadastro, nome_cadastro, mostra_cadastro, traducao_do_nivel_de_dor)
+from processamento import (
+    media_de_idade, cadastro_mais_antigo_realizado,
+    cadastro_mais_recente_realizado,
+    computa_a_distribuicao_da_triagem,
+    ordena_cadastros_por_nome,
+    ordena_cadastros_por_idade,
+    ordena_cadastros_por_estado,
+    ordena_cadastros_por_criacao
+    )
 # Módulos de bibliotecas externas:
 from externo.conversor import (tempo as tempo_legivel)
 
@@ -24,6 +34,9 @@ from externo.conversor import (tempo as tempo_legivel)
 NOME_DO_HOSPITAL = "Sociedade Hospitalar Dom Pedro II"
 # Caractére comum para criação da barra automática.
 TIJOLO_DA_BARRA = '-'
+# Tipo de ordenação atual do programa.
+TODOS_TIPOS = {"idade", "entrada", "estado", "alfabético", "aleatório", "nenhum"}
+ORDENACAO = "nenhum"
 
 def visualizacao_do_menu(*menus: list[str]) -> None:
     """
@@ -62,48 +75,54 @@ def visualizacao_do_menu(*menus: list[str]) -> None:
     # Espaçando e colocar a barra de baixo.
     print(''); print(barra_do_tamanho_da_tela(TIJOLO_DA_BARRA)); print('')
 
+def alterna_ordenacao(nova: str) -> None:
+    global ORDENACAO
+
+    if nova.lower() in TODOS_TIPOS:
+        antiga = ORDENACAO
+        ORDENACAO = nova
+        print(f"Ordem trocada de '{antiga}' para '{atual_ordenacao()}'")
+    else:
+        print("Tipo escolhido é inválido.")
+
+def atual_ordenacao() -> str:
+    global ORDENACAO
+    return ORDENACAO.capitalize()
+
 def listagem_de_cadastros() -> None:
+    """
+    Listagem de cadastros feitos por meio do nome.
+    """
     LISTA_DE_CADASTROS = todos_cadastros() 
     total = len(LISTA_DE_CADASTROS)
+
     # Pula uma linha para ficar mais organizado(espaçado).
     print("")
     
-    # Eu não gosto de aninhar funções para criar auxiliares, porém, como este código está
-    # muito relacionado a esta abstração do arquivo, abrirei uma exceção.
-    def print_formatado(nome, comprimento, tempo):
-        "Função auxilar para formatar uma saída mais bonita, com os seguintes parâmetros necessários."
-        lacuna = comprimento - len(nome)
-        tabular = comprimento + lacuna
-        SIMBOLO = '~ '
-        
-        print(f"{ESPACO}- {nome}{SIMBOLO:>{tabular}s}{traducao}")
-
     if len(LISTA_DE_CADASTROS) == 0:
         print("\nNão há cadastros.", end='\n\n')
     else:
-        print(f"\nTodos os {total} abaixo:", end='\n\n')
-        
-        # Pega o comprimento do maior nome.
-        comprimento = max(len(nome_cadastro(obj)) for obj in LISTA_DE_CADASTROS)
-        # Espaço padrão para qualquer item listado.
-        ESPACO = recuo(2)
-        
-        for dicio in LISTA_DE_CADASTROS:
-            for nome in dicio:
-                try:
-                    antigo = dicio[nome]["criação"].timestamp()
-                    novo = datetime.today().timestamp()
-                    decorrido = novo - antigo
-                    traducao = tempo_legivel(decorrido)
-                    
-                except ValueError:
-                    SEM_VALOR = "(ERROR)"
-                    traducao = SEM_VALOR
-                    
-                finally:
-                    print_formatado(nome, comprimento, traducao)
+        print(f"\nListagem dos cadastros abaixo estão ordenados por '{atual_ordenacao()}':", end='\n\n')
+
+        match atual_ordenacao():
+            case "Nenhum":
+                pass
+            case "Aleatório":
+                embaralha(LISTA_DE_CADASTROS)
+            case "Alfabético":
+                ordena_cadastros_por_nome(LISTA_DE_CADASTROS)
+            case "Idade":
+                ordena_cadastros_por_idade(LISTA_DE_CADASTROS)
+            case "Estado":
+                ordena_cadastros_por_estado(LISTA_DE_CADASTROS)
+            case "Entrada":
+                ordena_cadastros_por_criacao(LISTA_DE_CADASTROS)
+            case _:
+                raise ValueError("Tipo de ordenação não existe!")
+
+        visualiza_listagem_dos_cadastros(LISTA_DE_CADASTROS)
         # Pula uma linha para ficar mais organizado(espaçado).
-        print("")
+        print(f"\nFoi contabilizado {len(LISTA_DE_CADASTROS)} cadastros ao todo.", end='\n\n')
 
 def manual_de_ajuda_do_programa() -> None:
     print("""
@@ -128,6 +147,18 @@ def manual_de_ajuda_do_programa() -> None:
         \r\t           \tcorreto. Se você digitar algo similar, mas não exato, ele apenas sugere 
         \r\t           \talguns nomes que podem haver. Isso é até um bom jeito de limitar o que
         \r\t           \tvocê está procurando, digitando apenas algum sobre e tal.
+
+        \r\tOrdenação  \tEscolhe o tipo de ordenação que será feito, tanto na listagem do programa
+        \r\t           \tCLI, como na página web que também faz uma visualização dos cadastrados.
+        \r\t           \tOs tipos de opções são: 
+        \r\t           \t     - Nenhum    - Aleatório    - Alfabético 
+        \r\t           \t     - Idade     - Estado       - Entrada
+        \r\t           \tComos os outros o nome meio que diz sobre o que é, detalho aqui apenas 
+        \r\t           \tos não tão óbvio: no caso 'Entrada' é a ordenação de quando o paciente
+        \r\t           \tfoi cadastrado; já aleatório, ele embaralha cada vez que for listado;
+        \r\t           \t'Estado', senão é óbvio, é o estado de saúde do paciente; e 'Nenhum' 
+        \r\t           \tquer dizer que \r\t           \tele não realiza nenhum tipo de ordenação 
+        \r\t           \tou embaralhamento, apenas deixa como está.
         
         \r\tAjuda      \tApenas mostra este manual aqui. Como os nomes dos "botões" são muito curtos
         \r\t           \te sem qualquer contexto, esta página ajuda muito.
@@ -188,6 +219,33 @@ def entrada_escolha_do_menu(menus: list[str]) -> int:
         #raise ValueError(f"Não aceita está entrada {entrada}, apenas 'int' e 'str'.")
         print (f"Não aceita está entrada {entrada}, apenas 'int' e 'str'. Programa quebrou!")
         exit(2)
+
+def mostra_distribuicao_de_gravidade():
+    "Faz a impressão da distribuição dos pacientes baseado no seu estado de saúde."
+    distribuicao = computa_a_distribuicao_da_triagem()
+    
+    print("\nComo estão dividido a triagem dos pacientes cadastros:")
+    
+    for (tipo, percentual) in distribuicao.items():
+        estado = traducao_do_nivel_de_dor(tipo)
+        
+        print(f"\t{estado.capitalize():<20s} ~{percentual * 100.0:0.1f}%")
+
+def mostra_uma_info_mais_geral():
+    "Visualiza uma info mais genérica sobre os pacientes no hospital."
+    total = len(todos_cadastros())
+    
+    print(f"\nO total de inserções é {total} cadastros.")
+    print(f"A média de idade é {media_de_idade()} anos.")
+    print("\nOs cadastros mais velhos e novos feitos:")
+
+def mostra_ultimos_e_primeiros_pacientes():
+    "Mostra os últimos e primeiros pacientes que realizam cadastro no hospital."
+    antigo = cadastro_mais_antigo_realizado()
+    recente = cadastro_mais_recente_realizado()
+    
+    mostra_cadastro(antigo)
+    mostra_cadastro(recente)
 
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
 #                                Funções Auxiliares                                         #
@@ -255,6 +313,45 @@ def entrada_pura_de_dados() -> str:
     while entrada == '':
         entrada = input("Escolha uma opção: ")
     return entrada
+
+# Eu não gosto de aninhar funções para criar auxiliares, porém, como este código está
+# muito relacionado a esta abstração do arquivo, abrirei uma exceção.
+def print_formatado(nome, comprimento, tempo, idade, estado):
+    "Função auxilar para formatar uma saída mais bonita, com os seguintes parâmetros necessários."
+    lacuna = comprimento - len(nome)
+    tabular = comprimento + lacuna
+    SIMBOLO = '~ '
+    # Espaço padrão para qualquer item listado.
+    ESPACO = recuo(2)
+    status = traducao_do_nivel_de_dor(estado).capitalize()
+    
+    print(f"{ESPACO}- {nome}{SIMBOLO:>{tabular}s}{tempo:>12s} | {idade:>4} anos | {status}")
+
+def visualiza_listagem_dos_cadastros(cadastros: list[dict]) -> None:
+    "Cuida apenas do aspecto da listagem dos cadastros passados como argumentos."
+    # Realiza a ordenação por nome da lista.
+    LISTA_DE_CADASTROS = cadastros
+    
+    # Pega o comprimento do maior nome.
+    comprimento = max(len(nome_cadastro(obj)) for obj in LISTA_DE_CADASTROS)
+    
+    for dicio in LISTA_DE_CADASTROS:
+        for nome in dicio:
+            try:
+                antigo = dicio[nome]["criação"].timestamp()
+                novo = datetime.today().timestamp()
+                decorrido = novo - antigo
+                traducao = tempo_legivel(decorrido)
+                
+            except ValueError:
+                SEM_VALOR = "(ERROR)"
+                traducao = SEM_VALOR
+                
+            finally:
+                idade = dicio[nome]["idade"]
+                diagnostico = dicio[nome]["estado"]
+                print_formatado(nome, comprimento, traducao, idade, diagnostico)
+
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
 #                                Testes Unitários                                           #
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
