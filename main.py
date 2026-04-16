@@ -12,7 +12,7 @@ from interface import (
     cadastra_novo_usuario_agora, entrada_escolha_do_menu, visualizacao_do_menu, 
     listagem_de_cadastros, manual_de_ajuda_do_programa, cabecalho_padrao_do_hospital,
     mostra_distribuicao_de_gravidade, mostra_uma_info_mais_geral, 
-    mostra_ultimos_e_primeiros_pacientes
+    mostra_ultimos_e_primeiros_pacientes, alterna_ordenacao
     )
 from modelos import (nome_cadastro, mostra_cadastro)
 # Biblioteca padrão do Python:
