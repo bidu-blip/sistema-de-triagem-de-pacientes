@@ -12,9 +12,10 @@ from interface import (
     cadastra_novo_usuario_agora, entrada_escolha_do_menu, visualizacao_do_menu, 
     listagem_de_cadastros, manual_de_ajuda_do_programa, cabecalho_padrao_do_hospital,
     mostra_distribuicao_de_gravidade, mostra_uma_info_mais_geral, 
-    mostra_ultimos_e_primeiros_pacientes, alterna_ordenacao
+    mostra_ultimos_e_primeiros_pacientes, alterna_ordenacao, atual_ordenacao
     )
 from modelos import (nome_cadastro, mostra_cadastro)
+from webpagina import (cria_pagina_com_cadastros)
 # Biblioteca padrão do Python:
 from pprint import (pprint as Pprint)
 from sys import (argv as Argumentos)
@@ -73,6 +74,9 @@ if __name__ == "__main__":
                             print(f'\n\tO paciente \'{remove_paciente}\' não foi encontrado!', end='\n\n')
                 case 3:
                     listagem_de_cadastros()
+                    # Após uma listagem, também é alterado a página web também baseado nesta nova
+                    # ordenação demanada.
+                    cria_pagina_com_cadastros(todos_cadastros(), atual_ordenacao())
                 case 4:
                     mostra_uma_info_mais_geral()
                     mostra_ultimos_e_primeiros_pacientes()
@@ -97,7 +101,9 @@ if __name__ == "__main__":
                 case 6:
                     escolha = input("Alterar ordem prá: ")
                     alterna_ordenacao(escolha)
-                    pass
+                    # Após mudança de ordem, altera a página web também baseado nesta nova
+                    # ordenação demanada.
+                    cria_pagina_com_cadastros(todos_cadastros(), atual_ordenacao())
                 case 7:
                     manual_de_ajuda_do_programa()
                 case 8:
